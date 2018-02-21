@@ -1,50 +1,63 @@
-import dbUtil.dbConnection;
+package sample;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
-public class loginModel {
-    Connection connection;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-    public loginModel() {
-        try {
-            this.connection = dbConnection.getConnection();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+public class Controller implements Initializable {
+    private loginModel model = new loginModel();
+    //import object from scene builder
+    @FXML
+    private Label dbStatus;
+    @FXML
+    private Label loginStatus;
+    @FXML
+    private TextField username;
+    @FXML
+    private PasswordField password;
+    @FXML
+    private Button btnLogin;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        if (this.model.isDatabaseConnection()) {
+            this.dbStatus.setText("Connected to DB");
+        }else {
+            this.dbStatus.setText("Not Connect to DB");
         }
-        if (this.connection == null) {
-            System.exit(1);
-        }
-    }
 
-    public boolean isDatabaseConnection() {
-        return this.connection != null;
-    }
+    }//initializa
 
-    public boolean isLogin(String user, String pass) throws SQLException {
-        PreparedStatement pr = null;
-        ResultSet rs = null;
-        //sql
-        String sql = "select * from user where username = ? and password = ?";
-        try {
-            pr = this.connection.prepareStatement(sql);
-            pr.setString(1, user);
-            pr.setString(2, pass);
+    @FXML
+    public void Login(ActionEvent event){
+        System.out.println(username.getText());
+        System.out.println(password.getText());
 
-            rs = pr.executeQuery();
-            if (rs.next()) {
-                return true;
+        try{
+            if (this.model.isLogin(username.getText(), password.getText())){
+                Stage stage = (Stage) this.btnLogin.getScene().getWindow();
+                stage.close();
+                //loginStatus.setText("Welcome to our System");
+                adminDashBorad();
+            }else{
+                loginStatus.setText("Your username or password is invalid.");
             }
-            return false;
-        } catch (SQLException ex) {
+        }catch (Exception ex){
             ex.printStackTrace();
-            return false;
-        } finally {
-            pr.close();
-            rs.close();
         }
 
-    }//isLogin
-}
+    }//Login
+
+    private void adminDashBorad() {
+    }
+
+
+}//class
